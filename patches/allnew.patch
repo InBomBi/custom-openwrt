@@ -1,8 +1,8 @@
-diff --git a/package/boot/uboot-envtools/files/ramips b/package/boot/uboot-envtools/files/ramips
-index 341687625c..d8f4d07246 100644
---- a/package/boot/uboot-envtools/files/ramips
-+++ b/package/boot/uboot-envtools/files/ramips
-@@ -127,6 +127,7 @@ xiaomi,miwifi-3c)
+diff --git a/package/boot/uboot-tools/uboot-envtools/files/ramips b/package/boot/uboot-tools/uboot-envtools/files/ramips
+index 34d5b5015e..6a694e4349 100644
+--- a/package/boot/uboot-tools/uboot-envtools/files/ramips
++++ b/package/boot/uboot-tools/uboot-envtools/files/ramips
+@@ -129,6 +129,7 @@ xiaomi,miwifi-3c)
  xiaomi,mi-router-3g|\
  xiaomi,mi-router-3-pro|\
  xiaomi,mi-router-4|\
@@ -31,7 +31,7 @@ index 29633865b6..83b144cf21 100644
  
  				nvmem-layout {
 diff --git a/target/linux/ath79/image/tiny-tp-link.mk b/target/linux/ath79/image/tiny-tp-link.mk
-index 93cbc7d148..5aead2662b 100644
+index 70c3ab4c7b..e0a37cc8fa 100644
 --- a/target/linux/ath79/image/tiny-tp-link.mk
 +++ b/target/linux/ath79/image/tiny-tp-link.mk
 @@ -394,7 +394,7 @@ endef
@@ -43,63 +43,206 @@ index 93cbc7d148..5aead2662b 100644
    SOC := qca9533
    DEVICE_MODEL := TL-WR841N/ND
    DEVICE_VARIANT := v9
-diff --git a/target/linux/ramips/image/mt7620.mk b/target/linux/ramips/image/mt7620.mk
-index 6cf65ad119..1f82690f94 100644
---- a/target/linux/ramips/image/mt7620.mk
-+++ b/target/linux/ramips/image/mt7620.mk
-@@ -1410,6 +1410,26 @@ define Device/xiaomi_miwifi-mini
-   SUPPORTED_DEVICES += miwifi-mini
- endef
- TARGET_DEVICES += xiaomi_miwifi-mini
-+define Device/xiaomi_miwifi-r3
-+  SOC := mt7620a
-+  BLOCKSIZE := 128k
-+  PAGESIZE := 2048
-+  KERNEL_SIZE := 4096k
-+  IMAGE_SIZE := 32768k
-+  UBINIZE_OPTS := -E 5
-+  IMAGES += kernel1.bin rootfs0.bin breed-factory.bin factory.bin
-+  IMAGE/kernel1.bin := append-kernel | check-size $$$$(KERNEL_SIZE)
-+  IMAGE/rootfs0.bin := append-ubi | check-size
-+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | check-size
-+  IMAGE/breed-factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | \
-+			     append-kernel | pad-to $$(KERNEL_SIZE) | \
-+			     append-ubi | check-size
-+  DEVICE_VENDOR := Xiaomi
-+  DEVICE_MODEL := Mi Router R3
-+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci uboot-envtools
-+endef
-+TARGET_DEVICES += xiaomi_miwifi-r3
- 
- define Device/youku_x2
-   SOC := mt7620a
-diff --git a/target/linux/ramips/mt7620/base-files/etc/board.d/02_network b/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
-index 577f77cb93..294312fa31 100644
---- a/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
-+++ b/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
-@@ -269,6 +269,10 @@ ramips_setup_interfaces()
- 		ucidef_add_switch "switch0" \
- 			"5:lan" "4:wan" "6@eth0"
- 		;;
-+	xiaomi,miwifi-r3)
-+		ucidef_add_switch "switch0" \
-+			"1:lan" "4:lan" "0:wan" "6@eth0"
-+		;;
- 	youku,x2)
- 		ucidef_add_switch "switch0" \
- 			"1:lan:2" "4:lan:1" "0:wan" "6@eth0"
-@@ -443,6 +447,10 @@ ramips_setup_macs()
- 		wan_mac=$(mtd_get_mac_binary factory 0x2e)
- 		label_mac=$(mtd_get_mac_binary factory 0x8004)
- 		;;
-+	xiaomi,miwifi-r3)
-+		wan_mac=$(mtd_get_mac_binary factory 0x28)
-+		lan_mac=$(macaddr_setbit_la "$wan_mac")
-+		;;
- 	zyxel,keenetic-lite-iii-a)
- 		lan_mac=$(mtd_get_mac_binary RF-EEPROM 0x4)
- 		wan_mac=$(mtd_get_mac_binary RF-EEPROM 0x28)
+diff --git a/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
+new file mode 100644
+index 0000000000..a43f243727
+--- /dev/null
++++ b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
+@@ -0,0 +1,194 @@
++/dts-v1/;
++
++#include "mt7620a.dtsi"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++/ {
++	compatible = "xiaomi,miwifi-r3", "ralink,mt7620a-soc";
++	model = "Xiaomi Mi Router R3";
++
++	aliases {
++		led-status = &led_status_blue;
++	};
++
++	chosen {
++		bootargs = "console=ttyS0,115200";
++	};
++
++	keys {
++		compatible = "gpio-keys";
++
++		reset {
++			label = "reset";
++			gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
++			linux,code = <KEY_RESTART>;
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led_status_blue: blue {
++			label = "blue:status";
++			gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
++			default-state = "on";
++		};
++
++		yellow {
++			label = "yellow:status";
++			gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
++		};
++
++		red {
++			label = "red:status";
++			gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	nand {
++		status = "okay";
++		#address-cells = <1>;
++		#size-cells = <1>;
++		compatible = "mtk,mt7620-nand";
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "Bootloader";
++				reg = <0x0 0x40000>;
++				read-only;
++			};
++
++			partition@40000 {
++				label = "Config";
++				reg = <0x40000 0x40000>;
++			};
++
++			partition@80000 {
++				label = "Bdata";
++				reg = <0x80000 0x40000>;
++				read-only;
++			};
++
++			factory: partition@0xc0000 {
++				label = "factory";
++				reg = <0xc0000 0x40000>;
++				read-only;
++
++				nvmem-layout {
++					compatible = "fixed-layout";
++					#address-cells = <1>;
++					#size-cells = <1>;
++
++					eeprom_factory_0: eeprom@0 {
++						reg = <0x0 0x200>;
++					};
++
++					eeprom_factory_8000: eeprom@8000 {
++						reg = <0x8000 0x200>;
++					};
++
++					macaddr_factory_28: macaddr@28 {
++						reg = <0x28 0x6>;
++					};
++				};
++			};
++
++			partition@100000 {
++				label = "crash";
++				reg = <0x100000 0x40000>;
++				read-only;
++			};
++
++			partition@140000 {
++				label = "crash_syslog";
++				reg = <0x140000 0x40000>;
++				read-only;
++			};
++
++			partition@180000 {
++				label = "reserved0";
++				reg = <0x180000 0x80000>;
++				read-only;
++			};
++
++			partition@200000 {
++				label = "kernel_stock";
++				reg = <0x200000 0x400000>;
++			};
++
++			partition@600000 {
++				label = "kernel";
++				reg = <0x600000 0x400000>;
++			};
++
++			/* ubi partition is the result of squashing
++			 * next consequent stock partitions:
++			 * - rootfs0 (rootfs partition for stock kernel0),
++			 * - rootfs1 (rootfs partition for stock failsafe kernel1),
++			 * - overlay (used as ubi overlay in stock fw)
++			 * resulting 117,5MiB space for packages.
++			 */
++			partition@a00000 {
++				label = "ubi";
++				reg = <0xa00000 0x7600000>;
++			};
++		};
++	};
++};
++
++&gpio1 {
++	status = "okay";
++};
++
++&ehci {
++	status = "okay";
++};
++
++&ohci {
++	status = "okay";
++};
++
++&ethernet {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ephy_pins>;
++	nvmem-cells = <&macaddr_factory_28>;
++	nvmem-cell-names = "mac-address";
++	mediatek,portmap = "llllw";
++};
++
++&wmac {
++	pinctrl-names = "default", "pa_gpio";
++	pinctrl-0 = <&pa_pins>;
++	pinctrl-1 = <&pa_gpio_pins>;
++	nvmem-cells = <&eeprom_factory_0>;
++	nvmem-cell-names = "eeprom";
++};
++
++&pcie {
++	status = "okay";
++};
++
++&pcie0 {
++	wifi@0,0 {
++		compatible = "pci14c3,7662";
++		reg = <0x0000 0 0 0 0>;
++		nvmem-cells = <&eeprom_factory_8000>;
++		nvmem-cell-names = "eeprom";
++		ieee80211-freq-limit = <5000000 6000000>;
++	};
++};
++
++&pinctrl {
++	state_default: pinctrl0 {
++		gpio {
++			groups = "rgmii1";
++			function = "gpio";
++		};
++	};
++};
 diff --git a/target/linux/ramips/files/drivers/mtd/maps/ralink_nand.c b/target/linux/ramips/files/drivers/mtd/maps/ralink_nand.c
 new file mode 100644
 index 0000000000..a04b511a52
@@ -2452,8 +2595,84 @@ index 0000000000..b94dc09479
 +
 +
 +#endif
+diff --git a/target/linux/ramips/image/mt7620.mk b/target/linux/ramips/image/mt7620.mk
+index a21473311e..b266c19188 100644
+--- a/target/linux/ramips/image/mt7620.mk
++++ b/target/linux/ramips/image/mt7620.mk
+@@ -1433,6 +1433,27 @@ define Device/xiaomi_miwifi-mini
+ endef
+ TARGET_DEVICES += xiaomi_miwifi-mini
+ 
++define Device/xiaomi_miwifi-r3
++  SOC := mt7620a
++  BLOCKSIZE := 128k
++  PAGESIZE := 2048
++  KERNEL_SIZE := 4096k
++  IMAGE_SIZE := 32768k
++  UBINIZE_OPTS := -E 5
++  IMAGES += kernel1.bin rootfs0.bin breed-factory.bin factory.bin
++  IMAGE/kernel1.bin := append-kernel | check-size $$$$(KERNEL_SIZE)
++  IMAGE/rootfs0.bin := append-ubi | check-size
++  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
++  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | check-size
++  IMAGE/breed-factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | \
++			     append-kernel | pad-to $$(KERNEL_SIZE) | \
++			     append-ubi | check-size
++  DEVICE_VENDOR := Xiaomi
++  DEVICE_MODEL := Mi Router R3
++  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci uboot-envtools
++endef
++TARGET_DEVICES += xiaomi_miwifi-r3
++
+ define Device/youku_x2
+   SOC := mt7620a
+   IMAGE_SIZE := 16064k
+diff --git a/target/linux/ramips/mt7620/base-files/etc/board.d/02_network b/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+index 57db30b923..c888c36a42 100644
+--- a/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
++++ b/target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+@@ -204,6 +204,10 @@ ramips_setup_interfaces()
+ 		ucidef_add_switch "switch0" \
+ 			"0:lan:2" "1:lan:1" "4:wan" "6@eth0"
+ 		;;
++	xiaomi,miwifi-r3)
++		ucidef_add_switch "switch0" \
++			"1:lan" "4:lan" "0:wan" "6@eth0"
++		;;
+ 	lenovo,newifi-y1s)
+ 		ucidef_add_switch "switch0" \
+ 			"1:lan:4" "2:lan:3" "4:lan:2" "5:lan:1" "0:wan" "6@eth0"
+@@ -446,6 +450,10 @@ ramips_setup_macs()
+ 		wan_mac=$(mtd_get_mac_binary factory 0x2e)
+ 		label_mac=$(mtd_get_mac_binary factory 0x8004)
+ 		;;
++	xiaomi,miwifi-r3)
++		wan_mac=$(mtd_get_mac_binary factory 0x28)
++		lan_mac=$(macaddr_setbit_la "$wan_mac")
++		;;
+ 	zyxel,keenetic-lite-iii-a)
+ 		lan_mac=$(mtd_get_mac_binary RF-EEPROM 0x4)
+ 		wan_mac=$(mtd_get_mac_binary RF-EEPROM 0x28)
+diff --git a/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh b/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
+index 6dd7fc7cef..259b4407e4 100755
+--- a/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
+@@ -38,6 +38,13 @@ platform_do_upgrade() {
+ 				of=/dev/mtdblock$idx
+ 		default_do_upgrade "$1"
+ 		;;
++	xiaomi,miwifi-r3)
++		# this make it compatible with breed
++		dd if=/dev/mtd0 bs=64 count=1 2>/dev/null | grep -qi breed && CI_KERNPART_EXT="kernel_stock"
++		dd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi X-WRT && CI_KERNPART_EXT="kernel_stock"
++		dd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi NATCAP && CI_KERNPART_EXT="kernel0_rsvd"
++		nand_do_upgrade "$1"
++		;;
+ 	*)
+ 		default_do_upgrade "$1"
+ 		;;
 diff --git a/target/linux/ramips/mt7620/config-6.6 b/target/linux/ramips/mt7620/config-6.6
-index 3e1ef761e0..59027d2750 100644
+index 73651972c7..2af1f81d5d 100644
 --- a/target/linux/ramips/mt7620/config-6.6
 +++ b/target/linux/ramips/mt7620/config-6.6
 @@ -33,11 +33,16 @@ CONFIG_CPU_R4K_CACHE_TLB=y
@@ -2473,7 +2692,15 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_CSRC_R4K=y
  CONFIG_DEBUG_INFO=y
  CONFIG_DEBUG_PINCTRL=y
-@@ -102,6 +107,8 @@ CONFIG_IRQ_WORK=y
+@@ -85,6 +90,7 @@ CONFIG_GPIO_GENERIC=y
+ CONFIG_GPIO_RALINK=y
+ CONFIG_GPIO_WATCHDOG=y
+ # CONFIG_GPIO_WATCHDOG_ARCH_INITCALL is not set
++# CONFIG_GSW150_SUPPORT is not set
+ CONFIG_HARDWARE_WATCHPOINTS=y
+ CONFIG_HAS_DMA=y
+ CONFIG_HAS_IOMEM=y
+@@ -102,6 +108,8 @@ CONFIG_IRQ_WORK=y
  CONFIG_LIBFDT=y
  # CONFIG_LIST_HARDENED is not set
  CONFIG_LOCK_DEBUGGING_SUPPORT=y
@@ -2482,7 +2709,11 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_MARVELL_PHY=y
  CONFIG_MDIO_BUS=y
  CONFIG_MDIO_DEVICE=y
-@@ -124,6 +131,7 @@ CONFIG_MODULES_USE_ELF_REL=y
+@@ -121,9 +129,11 @@ CONFIG_MIPS_RAW_APPENDED_DTB=y
+ CONFIG_MIPS_SPRAM=y
+ CONFIG_MMU_LAZY_TLB_REFCOUNT=y
+ CONFIG_MODULES_USE_ELF_REL=y
++# CONFIG_MT753X_GSW is not set
  # CONFIG_MT7621_WDT is not set
  # CONFIG_MTD_CFI_INTELEXT is not set
  CONFIG_MTD_CMDLINE_PARTS=y
@@ -2490,7 +2721,7 @@ index 3e1ef761e0..59027d2750 100644
  # CONFIG_MTD_PARSER_TPLINK_SAFELOADER is not set
  CONFIG_MTD_PHYSMAP=y
  CONFIG_MTD_SPI_NOR=y
-@@ -132,6 +140,10 @@ CONFIG_MTD_SPLIT_JIMAGE_FW=y
+@@ -132,6 +142,10 @@ CONFIG_MTD_SPLIT_JIMAGE_FW=y
  CONFIG_MTD_SPLIT_SEAMA_FW=y
  CONFIG_MTD_SPLIT_TPLINK_FW=y
  CONFIG_MTD_SPLIT_UIMAGE_FW=y
@@ -2501,7 +2732,19 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_MTD_VIRT_CONCAT=y
  CONFIG_NEED_DMA_MAP_STATE=y
  CONFIG_NEED_PER_CPU_KM=y
-@@ -183,6 +195,9 @@ CONFIG_RALINK_TIMER=y
+@@ -178,12 +192,21 @@ CONFIG_PINCTRL_MT7620=y
+ CONFIG_PINCTRL_MTK_MTMIPS=y
+ # CONFIG_PINCTRL_SINGLE is not set
+ CONFIG_PREEMPT_NONE_BUILD=y
++CONFIG_PSTORE=y
++CONFIG_PSTORE_COMPRESS=y
++CONFIG_PSTORE_COMPRESS_DEFAULT="deflate"
++CONFIG_PSTORE_DEFLATE_COMPRESS=y
++CONFIG_PSTORE_DEFLATE_COMPRESS_DEFAULT=y
++CONFIG_PSTORE_RAM=y
+ CONFIG_PTP_1588_CLOCK_OPTIONAL=y
+ CONFIG_RALINK=y
+ CONFIG_RALINK_TIMER=y
  CONFIG_RALINK_WDT=y
  CONFIG_RANDSTRUCT_NONE=y
  CONFIG_RATIONAL=y
@@ -2511,7 +2754,7 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_REGMAP=y
  CONFIG_REGMAP_MMIO=y
  CONFIG_REGULATOR=y
-@@ -192,6 +207,7 @@ CONFIG_SERIAL_8250_RT288X=y
+@@ -193,6 +216,7 @@ CONFIG_SERIAL_8250_RT288X=y
  CONFIG_SERIAL_MCTRL_GPIO=y
  CONFIG_SERIAL_OF_PLATFORM=y
  CONFIG_SOC_BUS=y
@@ -2519,7 +2762,7 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_SOC_MT7620=y
  # CONFIG_SOC_MT7621 is not set
  # CONFIG_SOC_RT288X is not set
-@@ -221,7 +237,12 @@ CONFIG_TICK_CPU_ACCOUNTING=y
+@@ -222,7 +246,12 @@ CONFIG_TICK_CPU_ACCOUNTING=y
  CONFIG_TIMER_OF=y
  CONFIG_TIMER_PROBE=y
  CONFIG_TINY_SRCU=y
@@ -2532,6 +2775,19 @@ index 3e1ef761e0..59027d2750 100644
  CONFIG_ZBOOT_LOAD_ADDRESS=0x0
 +CONFIG_ZLIB_DEFLATE=y
 +CONFIG_ZLIB_INFLATE=y
+diff --git a/target/linux/ramips/mt7620/target.mk b/target/linux/ramips/mt7620/target.mk
+index 34488f95af..1d1d281a0f 100644
+--- a/target/linux/ramips/mt7620/target.mk
++++ b/target/linux/ramips/mt7620/target.mk
+@@ -4,7 +4,7 @@
+ 
+ SUBTARGET:=mt7620
+ BOARDNAME:=MT7620 based boards
+-FEATURES+=usb ramdisk
++FEATURES+=usb nand ramdisk
+ CPU_TYPE:=24kc
+ 
+ DEFAULT_PACKAGES += kmod-rt2800-soc wpad-basic-mbedtls swconfig
 diff --git a/target/linux/ramips/patches-6.6/0038-mtd-ralink-add-mt7620-nand-driver.patch b/target/linux/ramips/patches-6.6/0038-mtd-ralink-add-mt7620-nand-driver.patch
 new file mode 100644
 index 0000000000..c932d2f5a9
@@ -2556,221 +2812,3 @@ index 0000000000..c932d2f5a9
 + obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
 + obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
 ++obj-$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o
-diff --git a/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
-new file mode 100644
-index 0000000000..a43f243727
---- /dev/null
-+++ b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
-@@ -0,0 +1,194 @@
-+/dts-v1/;
-+
-+#include "mt7620a.dtsi"
-+
-+#include <dt-bindings/gpio/gpio.h>
-+#include <dt-bindings/input/input.h>
-+
-+/ {
-+	compatible = "xiaomi,miwifi-r3", "ralink,mt7620a-soc";
-+	model = "Xiaomi Mi Router R3";
-+
-+	aliases {
-+		led-status = &led_status_blue;
-+	};
-+
-+	chosen {
-+		bootargs = "console=ttyS0,115200";
-+	};
-+
-+	keys {
-+		compatible = "gpio-keys";
-+
-+		reset {
-+			label = "reset";
-+			gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
-+			linux,code = <KEY_RESTART>;
-+		};
-+	};
-+
-+	leds {
-+		compatible = "gpio-leds";
-+
-+		led_status_blue: blue {
-+			label = "blue:status";
-+			gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
-+			default-state = "on";
-+		};
-+
-+		yellow {
-+			label = "yellow:status";
-+			gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
-+		};
-+
-+		red {
-+			label = "red:status";
-+			gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
-+		};
-+	};
-+
-+	nand {
-+		status = "okay";
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		compatible = "mtk,mt7620-nand";
-+
-+		partitions {
-+			compatible = "fixed-partitions";
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+
-+			partition@0 {
-+				label = "Bootloader";
-+				reg = <0x0 0x40000>;
-+				read-only;
-+			};
-+
-+			partition@40000 {
-+				label = "Config";
-+				reg = <0x40000 0x40000>;
-+			};
-+
-+			partition@80000 {
-+				label = "Bdata";
-+				reg = <0x80000 0x40000>;
-+				read-only;
-+			};
-+
-+			factory: partition@0xc0000 {
-+				label = "factory";
-+				reg = <0xc0000 0x40000>;
-+				read-only;
-+
-+				nvmem-layout {
-+					compatible = "fixed-layout";
-+					#address-cells = <1>;
-+					#size-cells = <1>;
-+
-+					eeprom_factory_0: eeprom@0 {
-+						reg = <0x0 0x200>;
-+					};
-+
-+					eeprom_factory_8000: eeprom@8000 {
-+						reg = <0x8000 0x200>;
-+					};
-+
-+					macaddr_factory_28: macaddr@28 {
-+						reg = <0x28 0x6>;
-+					};
-+				};
-+			};
-+
-+			partition@100000 {
-+				label = "crash";
-+				reg = <0x100000 0x40000>;
-+				read-only;
-+			};
-+
-+			partition@140000 {
-+				label = "crash_syslog";
-+				reg = <0x140000 0x40000>;
-+				read-only;
-+			};
-+
-+			partition@180000 {
-+				label = "reserved0";
-+				reg = <0x180000 0x80000>;
-+				read-only;
-+			};
-+
-+			partition@200000 {
-+				label = "kernel_stock";
-+				reg = <0x200000 0x400000>;
-+			};
-+
-+			partition@600000 {
-+				label = "kernel";
-+				reg = <0x600000 0x400000>;
-+			};
-+
-+			/* ubi partition is the result of squashing
-+			 * next consequent stock partitions:
-+			 * - rootfs0 (rootfs partition for stock kernel0),
-+			 * - rootfs1 (rootfs partition for stock failsafe kernel1),
-+			 * - overlay (used as ubi overlay in stock fw)
-+			 * resulting 117,5MiB space for packages.
-+			 */
-+			partition@a00000 {
-+				label = "ubi";
-+				reg = <0xa00000 0x7600000>;
-+			};
-+		};
-+	};
-+};
-+
-+&gpio1 {
-+	status = "okay";
-+};
-+
-+&ehci {
-+	status = "okay";
-+};
-+
-+&ohci {
-+	status = "okay";
-+};
-+
-+&ethernet {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&ephy_pins>;
-+	nvmem-cells = <&macaddr_factory_28>;
-+	nvmem-cell-names = "mac-address";
-+	mediatek,portmap = "llllw";
-+};
-+
-+&wmac {
-+	pinctrl-names = "default", "pa_gpio";
-+	pinctrl-0 = <&pa_pins>;
-+	pinctrl-1 = <&pa_gpio_pins>;
-+	nvmem-cells = <&eeprom_factory_0>;
-+	nvmem-cell-names = "eeprom";
-+};
-+
-+&pcie {
-+	status = "okay";
-+};
-+
-+&pcie0 {
-+	wifi@0,0 {
-+		compatible = "pci14c3,7662";
-+		reg = <0x0000 0 0 0 0>;
-+		nvmem-cells = <&eeprom_factory_8000>;
-+		nvmem-cell-names = "eeprom";
-+		ieee80211-freq-limit = <5000000 6000000>;
-+	};
-+};
-+
-+&pinctrl {
-+	state_default: pinctrl0 {
-+		gpio {
-+			groups = "rgmii1";
-+			function = "gpio";
-+		};
-+	};
-+};
-diff --git a/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh b/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
-index 6dd7fc7cef..259b4407e4 100755
---- a/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
-+++ b/target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
-@@ -38,6 +38,13 @@ platform_do_upgrade() {
- 				of=/dev/mtdblock$idx
- 		default_do_upgrade "$1"
- 		;;
-+	xiaomi,miwifi-r3)
-+		# this make it compatible with breed
-+		dd if=/dev/mtd0 bs=64 count=1 2>/dev/null | grep -qi breed && CI_KERNPART_EXT="kernel_stock"
-+		dd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi X-WRT && CI_KERNPART_EXT="kernel_stock"
-+		dd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi NATCAP && CI_KERNPART_EXT="kernel0_rsvd"
-+		nand_do_upgrade "$1"
-+		;;
- 	*)
- 		default_do_upgrade "$1"
- 		;;
