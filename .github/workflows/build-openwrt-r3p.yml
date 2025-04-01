@@ -42,10 +42,11 @@ env:
 jobs:
           
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@v4      
+      uses: actions/checkout@v4
+      
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
@@ -54,12 +55,11 @@ jobs:
       run: npm install -g bats
     - name: install bats
       run: bats -v
-    - name: Clean Up Docker Images
-      run: docker rmi `docker images -q`    
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        docker rmi `docker images -q`
         sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
         sudo -E apt-mark hold grub-efi-amd64-signed
         sudo -E apt update
