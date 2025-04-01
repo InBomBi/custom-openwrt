@@ -55,8 +55,7 @@ jobs:
     - name: install bats
       run: bats -v
     - name: Clean Up Docker Images
-      run: |
-        docker rmi $(docker images -q)    
+      run: docker rmi `docker images -q`    
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
