@@ -59,7 +59,7 @@ jobs:
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
-        run: |
+      run: |
           # Xóa Docker images chỉ khi có tồn tại image
           docker image prune -af || true
           # Dọn dẹp các thư mục tốn dung lượng
@@ -75,7 +75,6 @@ jobs:
           sudo timedatectl set-timezone "Asia/Ho_Chi_Minh"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
-
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -123,13 +122,6 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: Apply patches
-      run: |
-        [ -d $PATCHES_PATH ] && mv $PATCHES_PATH openwrt/$PATCHES_PATH
-        cd openwrt
-        [ -d $PATCHES_PATH ] && for FILE in $(ls $PATCHES_PATH | grep allnew.patch); do git apply --check $PATCHES_PATH/$FILE; git apply --no-index --ignore-space-change --ignore-whitespace $PATCHES_PATH/$FILE; done
-        git status -s
-        
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
