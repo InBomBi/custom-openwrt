@@ -16,9 +16,7 @@ awk '{
     if ($0 ~ /xiaomi,mi-router-4|\\/) {
         print " xiaomi,miwifi-r3|\\"
     }
-}' package/boot/uboot-tools/uboot-envtools/files/ramips > temp.file && mv temp.file package/boot/uboot-tools/uboot-
-
-envtools/files/ramips
+}' package/boot/uboot-tools/uboot-envtools/files/ramips > temp.file && mv temp.file package/boot/uboot-tools/uboot-envtools/files/ramips
 
 # 2. File: target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi
 awk '{
@@ -29,9 +27,7 @@ awk '{
     if ($0 ~ /reg = <0x3f0000 0x010000>;/) 
         gsub(/0x3f0000/, "0xff0000");
     print $0;
-}' target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi > temp.file && mv temp.file target/linux/ath79/dts/qca9533_tplink_tl-
-
-wr841.dtsi
+}' target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi > temp.file && mv temp.file target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi
 
 # 3. File: target/linux/ath79/image/tiny-tp-link.mk
 awk '{
@@ -40,10 +36,8 @@ awk '{
     print $0;
 }' target/linux/ath79/image/tiny-tp-link.mk > temp.file && mv temp.file target/linux/ath79/image/tiny-tp-link.mk
 
-# 4. Đối với các File Mới (New Files)
-Đối với file mt7620a_xiaomi_miwifi-r3.dts và ralink_nand.c, vì đây là file tạo mới hoàn # 
-
-toàn (new file mode 100644), việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
+# 4. Đối với các File Mới (New Files) Đối với file mt7620a_xiaomi_miwifi-r3.dts và ralink_nand.c, vì đây là file tạo mới hoàn 
+#    toàn (new file mode 100644), việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
 cat << 'EOF' > target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
 /dts-v1/;
 
