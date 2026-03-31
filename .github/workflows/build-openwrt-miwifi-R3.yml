@@ -66,7 +66,7 @@ jobs:
           sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/share/swift
           # Cập nhật và xóa các gói không cần thiết (kết hợp để giảm lỗi)
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* snap* || true
+          # sudo -E apt-get -qq -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* snap* || true
           # Cài đặt công cụ cần thiết (Bỏ qua full-upgrade để tránh lỗi hệ thống)
           sudo -E apt-get -qq -y install binutils bzip2 diff find flex gawk gcc-6+ getopt grep install libc-dev libz-dev make4.1+ perl python3.7+ rsync subversion unzip which
           sudo -E apt-get -qq autoremove --purge
