@@ -237,6 +237,7 @@ EOF
 
 # 4a. Đối với các File Mới (New Files)
 # toàn (new file mode 100644), việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
+mkdir -p target/linux/ramips/files/drivers/mtd/maps/
 cat << 'EOF' > target/linux/ramips/files/drivers/mtd/maps/ralink_nand.c
 #define DEBUG
 #include <linux/device.h>
@@ -2372,9 +2373,9 @@ MODULE_LICENSE("GPL");
 EOF
 
 # 4b. Đối với các File Mới (New Files)
-Đối với file ralink_nand.h, vì đây là file tạo mới hoàn # toàn (new file mode 100644), 
-
-việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
+# Đối với file ralink_nand.h, vì đây là file tạo mới hoàn # toàn (new file mode 100644), 
+# việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
+mkdir -p target/linux/ramips/files/drivers/mtd/maps/
 cat << 'EOF' > target/linux/ramips/files/drivers/mtd/maps/ralink_nand.h
 #ifndef RT2880_NAND_H
 #define RT2880_NAND_H
@@ -2650,9 +2651,7 @@ awk '/lenovo,newifi-y1s\)/ {
     print "\t\tucidef_add_switch \"switch0\" \\"
     print "\t\t\t\"1:lan\" \"4:lan\" \"0:wan\" \"6@eth0\""
     print "\t\t;;"
-} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net 
-
-target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net target/linux/ramips/mt7620/base-files/etc/board.d/02_network
 
 # Thêm MAC config
 awk '/zyxel,keenetic-lite-iii-a\)/ {
@@ -2660,9 +2659,7 @@ awk '/zyxel,keenetic-lite-iii-a\)/ {
     print "\t\twan_mac=$(mtd_get_mac_binary factory 0x28)"
     print "\t\tlan_mac=$(macaddr_setbit_la \"$wan_mac\")"
     print "\t\t;;"
-} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net 
-
-target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net target/linux/ramips/mt7620/base-files/etc/board.d/02_network
 
 # 7. File: .../base-files/lib/upgrade/platform.sh
 awk '/\*\)/ && !done {
@@ -2678,9 +2675,7 @@ awk '/\*\)/ && !done {
     print "\t\tnand_do_upgrade \"$1\""
     print "\t\t;;"
     done=1
-} { print }' target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh > temp.sh && mv temp.sh 
-
-target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
+} { print }' target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh > temp.sh && mv temp.sh target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
 # thay doi target/linux/ramips/mt7620/config-6.12
 sed -i \
 -e '/CONFIG_CPU_SUPPORTS_MSA=y/a CONFIG_CRC16=y\nCONFIG_CRYPTO_DEFLATE=y\nCONFIG_CRYPTO_HASH_INFO=y' \
@@ -2698,7 +2693,7 @@ sed -i \
 target/linux/ramips/mt7620/config-6.12
 
 # 8. Tạo File Patch Mới (0038-mtd-ralink-add-mt7620-nand-driver.patch)
-cat << 'EOF' > target/linux/ramips/patches-6.6/0038-mtd-ralink-add-mt7620-nand-driver.patch
+cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
 --- a/drivers/mtd/maps/Kconfig
 +++ b/drivers/mtd/maps/Kconfig
 @@ -385,4 +385,8 @@ config MTD_PISMO
