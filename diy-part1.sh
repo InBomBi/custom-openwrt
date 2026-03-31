@@ -1958,9 +1958,7 @@ static int nand_do_read_ops(struct ra_nand_chip *ra, loff_t from,
 
 
 		ra_nand_bbt_set(ra, addr >> ra->erase_shift, BBT_TAG_GOOD);
-		// address go further to next page, instead of increasing of length of write. This avoids some special cases 
-
-wrong.
+		// address go further to next page, instead of increasing of length of write. This avoids some special cases wrong.
 		addr = (page+1) << ra->page_shift;
 	}
 	return 0;
