@@ -36,6 +36,9 @@ awk '{
     print $0;
 }' target/linux/ath79/image/tiny-tp-link.mk > temp.file && mv temp.file target/linux/ath79/image/tiny-tp-link.mk
 
+# 3.b File: target/linux/ramips/mt7620/target.mk
+awk '/FEATURES\+=usb/ { gsub(/usb/, "usb nand"); } { print }' target/linux/ramips/mt7620/target.mk > temp.file && mv temp.file target/linux/ramips/mt7620/target.mk
+
 # 4. Đối với các File Mới (New Files) Đối với file mt7620a_xiaomi_miwifi-r3.dts và ralink_nand.c, vì đây là file tạo mới hoàn 
 # toàn (new file mode 100644), việc dùng awk để "sửa" là không khả thi vì chưa có file gốc.
 cat << 'EOF' > target/linux/ramips/dts/mt7620a_xiaomi_miwifi-r3.dts
