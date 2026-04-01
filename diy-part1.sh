@@ -2664,12 +2664,8 @@ awk '/\*\)/ && !done {
     print "\txiaomi,miwifi-r3)"
     print "\t\t# this make it compatible with breed"
     print "\t\tdd if=/dev/mtd0 bs=64 count=1 2>/dev/null | grep -qi breed && CI_KERNPART_EXT=\"kernel_stock\""
-    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi X-WRT && CI_KERNPART_EXT=
-
-\"kernel_stock\""
-    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi NATCAP && CI_KERNPART_EXT=
-
-\"kernel0_rsvd\""
+    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi X-WRT && CI_KERNPART_EXT=\"kernel_stock\""
+    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi NATCAP && CI_KERNPART_EXT=\"kernel0_rsvd\""
     print "\t\tnand_do_upgrade \"$1\""
     print "\t\t;;"
     done=1
