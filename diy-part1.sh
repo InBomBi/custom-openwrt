@@ -2694,7 +2694,7 @@ target/linux/ramips/mt7620/config-6.12
 cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
 --- a/drivers/mtd/maps/Kconfig
 +++ b/drivers/mtd/maps/Kconfig
-@@ -385,4 +385,8 @@ config MTD_PISMO
+@@ -378,4 +378,8 @@ config MTD_PISMO
  
  	  When built as a module, it will be called pismo.ko
  
@@ -2705,8 +2705,8 @@ cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-
  endmenu
 --- a/drivers/mtd/maps/Makefile
 +++ b/drivers/mtd/maps/Makefile
-@@ -43,3 +43,4 @@ obj-$(CONFIG_MTD_PLATRAM)	+= plat-ram.o
- obj-$(CONFIG_MTD_INTEL_VR_NOR)	+= intel_vr_nor.o
+@@ -41,3 +41,4 @@ obj-$(CONFIG_MTD_SCB2_FLASH)	+= scb2_fla
+ obj-$(CONFIG_MTD_PLATRAM)	+= plat-ram.o
  obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
  obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
 +obj-$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o
