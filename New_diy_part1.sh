@@ -2590,16 +2590,26 @@ EOF
 )
 patch_by_awk "$UPGRADE_FILE" "case \"\$board\" in" "$UPGRADE_BLOCK" "after"
 
-# 8. Kernel Config (Dùng Update-or-Append để không phụ thuộc dòng)
+# 8. Kernel Config (Sửa lỗi dính dòng bằng cách đảm bảo dòng trống cuối file)
 CONF_FILE="target/linux/ramips/mt7620/config-6.12"
-declare -A KCONFIGS=(
-    ["CONFIG_CRC16"]="y" ["CONFIG_CRYPTO_DEFLATE"]="y" ["CONFIG_MTD_NAND_MT7620"]="y"
-    ["CONFIG_MTD_UBI"]="y" ["CONFIG_MTD_UBI_BEB_LIMIT"]="20" ["CONFIG_MTD_UBI_BLOCK"]="y"
-    ["CONFIG_UBIFS_FS"]="y" ["CONFIG_ZLIB_DEFLATE"]="y" ["CONFIG_LZO_COMPRESS"]="y"
-    ["CONFIG_LZO_DECOMPRESS"]="y" ["CONFIG_REED_SOLOMON"]="y"
-)
-
 if [ -f "$CONF_FILE" ]; then
+    # Đảm bảo file kết thúc bằng một dòng trống mới
+    sed -i '$a\' "$CONF_FILE"
+    
+    declare -A KCONFIGS=(
+        ["CONFIG_CRC16"]="y" 
+        ["CONFIG_CRYPTO_DEFLATE"]="y" 
+        ["CONFIG_MTD_NAND_MT7620"]="y"
+        ["CONFIG_MTD_UBI"]="y" 
+        ["CONFIG_MTD_UBI_BEB_LIMIT"]="20" 
+        ["CONFIG_MTD_UBI_BLOCK"]="y"
+        ["CONFIG_UBIFS_FS"]="y" 
+        ["CONFIG_ZLIB_DEFLATE"]="y" 
+        ["CONFIG_LZO_COMPRESS"]="y"
+        ["CONFIG_LZO_DECOMPRESS"]="y" 
+        ["CONFIG_REED_SOLOMON"]="y"
+    )
+
     for CFG in "${!KCONFIGS[@]}"; do
         VAL="${KCONFIGS[$CFG]}"
         if grep -qE "^(# )?$CFG([ =]|$)" "$CONF_FILE"; then
@@ -2608,21 +2618,23 @@ if [ -f "$CONF_FILE" ]; then
             echo "$CFG=$VAL" >> "$CONF_FILE"
         fi
     done
-fi
-
-# 9. Thay thế Patch file bằng AWK (Sửa Kconfig/Makefile của Kernel)
-# Tìm dòng "endmenu" và chèn config mới vào ngay phía trên
+# 9. Sửa lỗi định dạng Tab trong Kconfig (Quan trọng để hết lỗi syncconfig)
 KCONFIG_KERNEL="target/linux/ramips/files/drivers/mtd/maps/Kconfig"
 MAKEFILE_KERNEL="target/linux/ramips/files/drivers/mtd/maps/Makefile"
 
 mkdir -p target/linux/ramips/files/drivers/mtd/maps/
 
-# Chèn Kconfig driver mới
-if [ -f "$KCONFIG_KERNEL" ]; then
-    patch_by_awk "$KCONFIG_KERNEL" "endmenu" "config MTD_NAND_MT7620\n\ttristate \"Support for NAND on Mediatek MT7620\"\n\tdepends on RALINK && SOC_MT7620\n" "before"
+if [ -f "$KCONFIG_KERNEL" ] && ! grep -q "MTD_NAND_MT7620" "$KCONFIG_KERNEL"; then
+    # Sử dụng printf để đảm bảo chèn đúng ký tự TAB (\t) thay vì dấu cách
+    CONTENT=$(printf "config MTD_NAND_MT7620\n\ttristate \"Support for NAND on Mediatek MT7620\"\n\tdepends on RALINK && SOC_MT7620\n")
+    
+    awk -v content="$CONTENT" '/endmenu/ { print content; print $0; next } { print }' \
+        "$KCONFIG_KERNEL" > "$KCONFIG_KERNEL.tmp" && mv "$KCONFIG_KERNEL.tmp" "$KCONFIG_KERNEL"
 fi
 
-# Chèn Makefile driver mới
 if [ -f "$MAKEFILE_KERNEL" ] && ! grep -q "ralink_nand.o" "$MAKEFILE_KERNEL"; then
+    sed -i '$a\' "$MAKEFILE_KERNEL"
     echo "obj-\$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o" >> "$MAKEFILE_KERNEL"
 fi
+fi
+
