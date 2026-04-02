@@ -1,0 +1,24 @@
+name: Cleanup Workflow Runs
+
+on:
+  workflow_dispatch: # Chạy thủ công từ tab Actions
+  schedule:
+    - cron: '0 0 * * 1' # Chạy tự động vào mỗi thứ 2 hàng tuần
+
+jobs:
+  delete-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete workflow runs
+        env:
+          # Sử dụng Token tùy chỉnh của bạn ở đây
+          GH_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
+          WORKFLOW_ID: "your_workflow_id" 
+        run: |
+          echo "📦 Đang lấy danh sách và xóa các bản thực thi của workflow: $WORKFLOW_ID"
+          
+          # Sử dụng GitHub CLI để tìm và xóa
+          # Lệnh này sẽ lấy 100 bản thực thi gần nhất và xóa chúng
+          gh run list --workflow "$WORKFLOW_ID" --limit 100 --json databaseId -q '.[].databaseId' | xargs -I {} gh run delete {}
+          
+          echo "✅ Đã dọn dẹp xong."
