@@ -22,7 +22,7 @@ env:
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config-mir3
   PATCHES_PATH: patches
-  DIY_P1_SH: new_diy_part1.sh
+  DIY_P1_SH: New_diy_part1.sh
   DIY_P2_SH: diy-part2.sh
   #by default used .config for build from repo
   #if your repo not contain .config, you may download it from direct url setting by ALT_CONFIG_URL variable
