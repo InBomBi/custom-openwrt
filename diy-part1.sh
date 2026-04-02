@@ -2629,14 +2629,14 @@ awk '/define Device\/youku_x2/ {
     print "  KERNEL_SIZE := 4096k"
     print "  IMAGE_SIZE := 32768k"
     print "  UBINIZE_OPTS := -E 5"
-    print "  IMAGES += kernel1.bin rootfs0.bin breed-factory.bin factory.bin"
+    print "  IMAGES += kernel1.bin rootfs0.bin"
     print "  IMAGE/kernel1.bin := append-kernel | check-size $$(KERNEL_SIZE)"
-    print "  IMAGE/rootfs0.bin := append-ubi | check-size"
+    print "  IMAGE/rootfs0.bin := append-ubi | check-size $$$$(IMAGE_SIZE)"
     print "  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata"
-    print "  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | check-size"
-    print "  IMAGE/breed-factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | \\"
-    print "                         append-kernel | pad-to $$(KERNEL_SIZE) | \\"
-    print "                         append-ubi | check-size"
+#   print "  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | check-size"
+#   print "  IMAGE/breed-factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | \\"
+#   print "                         append-kernel | pad-to $$(KERNEL_SIZE) | \\"
+#   print "                         append-ubi | check-size"
     print "  DEVICE_VENDOR := Xiaomi"
     print "  DEVICE_MODEL := Mi Router R3"
     print "  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci uboot-envtools"
@@ -2681,6 +2681,7 @@ sed -i \
 -e '/CONFIG_LOCK_DEBUGGING_SUPPORT=y/a CONFIG_LZO_COMPRESS=y\nCONFIG_LZO_DECOMPRESS=y' \
 -e '/CONFIG_MTD_CMDLINE_PARTS=y/a CONFIG_MTD_NAND_MT7620=y' \
 -e '/CONFIG_MTD_SPLIT_UIMAGE_FW=y/a CONFIG_MTD_UBI=y\nCONFIG_MTD_UBI_BEB_LIMIT=20\nCONFIG_MTD_UBI_BLOCK=y\nCONFIG_MTD_UBI_WL_THRESHOLD=4096' \
+-e '# CONFIG_PINCTRL_SINGLE is not set/a CONFIG_PSTORE=y\nCONFIG_PSTORE_COMPRESS=y\nCONFIG_PSTORE_COMPRESS_DEFAULT="deflate"\nCONFIG_PSTORE_DEFLATE_COMPRESS=y\nCONFIG_PSTORE_DEFLATE_COMPRESS_DEFAULT=y\nCONFIG_PSTORE_RAM=y' \
 -e '/CONFIG_RATIONAL=y/a CONFIG_REED_SOLOMON=y\nCONFIG_REED_SOLOMON_DEC8=y\nCONFIG_REED_SOLOMON_ENC8=y' \
 -e '/CONFIG_SOC_BUS=y/a CONFIG_SGL_ALLOC=y' \
 -e '/CONFIG_TINY_SRCU=y/a CONFIG_UBIFS_FS=y\nCONFIG_UBIFS_FS_ADVANCED_COMPR=y\n# CONFIG_UBIFS_FS_ZSTD is not set' \
