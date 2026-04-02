@@ -23,7 +23,7 @@ patch_by_awk() {
 
 # 1. Cấu hình uboot-envtools
 patch_by_awk "package/boot/uboot-tools/uboot-envtools/files/ramips" \
-    'xiaomi,mi-router-4|\\' ' xiaomi,miwifi-r3|\\' "after"
+    "xiaomi,mi-router-4|\\\\" " xiaomi,miwifi-r3|\\\\" "after"
 	
 # 2. Cấu hình DTS cho TPLINK WR841 (Dùng sed thay đổi giá trị cụ thể)
 DTS_WR841="target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi"
