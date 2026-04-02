@@ -163,7 +163,7 @@ jobs:
     - name: Compile firmware
       id: compile
       run: |
-        cd xwrt
+        cd openwrt
         echo -e "$(nproc) thread compile"
         # Hiển thị trạng thái cache trước khi build
         ccache -s
