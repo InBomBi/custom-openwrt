@@ -3,30 +3,34 @@ name: Cleanup All Workflow Runs
 on:
   workflow_dispatch: 
 
+# Cấp quyền ghi trực tiếp cho Workflow
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   delete-runs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete all workflow runs
         env:
-          GH_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
-          # Thay thế bằng username và tên repo của bạn
-          REPO: "${{ github.repository }}" 
+          # Thử dùng GITHUB_TOKEN mặc định trước, nếu vẫn muốn dùng PAT thì thay lại bên dưới
+          GH_TOKEN: ${{ github.token }} 
+          REPO: "${{ github.repository }}"
         run: |
-          echo "🧹 Đang quét toàn bộ các workflow runs trong $REPO..."
+          echo "🧹 Đang quét các bản chạy tại $REPO..."
           
-          # Thêm flag -R $REPO để chỉ định rõ repository cho GitHub CLI
-          RUNS=$(gh run list -R "$REPO" --limit 1000 --json databaseId -q '.[].databaseId')
+          # Lấy danh sách ID (trừ bản đang chạy hiện tại để tránh xung đột)
+          RUNS=$(gh run list -R "$REPO" --limit 1000 --json databaseId,status -q '.[] | select(.status != "in_progress") | .databaseId')
 
           if [ -z "$RUNS" ]; then
-            echo "✅ Không tìm thấy lượt chạy nào để xóa."
+            echo "✅ Không có gì để xóa."
             exit 0
           fi
 
-          echo "🗑️ Đang xóa các lượt chạy..."
           for RUN_ID in $RUNS; do
-            # Thêm -R $REPO ở đây nữa để lệnh delete biết xóa ở đâu
+            echo "🗑️ Đang xóa ID: $RUN_ID"
             gh run delete -R "$REPO" "$RUN_ID" || true
           done
-
-          echo "✅ Đã dọn dẹp xong toàn bộ lịch sử."
+          
+          echo "✅ Xong!"
