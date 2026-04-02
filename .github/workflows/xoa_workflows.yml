@@ -1,7 +1,7 @@
 name: Cleanup All Workflow Runs
 
 on:
-  workflow_dispatch: # Chạy thủ công khi bạn muốn
+  workflow_dispatch: 
 
 jobs:
   delete-runs:
@@ -10,12 +10,13 @@ jobs:
       - name: Delete all workflow runs
         env:
           GH_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
+          # Thay thế bằng username và tên repo của bạn
+          REPO: "${{ github.repository }}" 
         run: |
-          echo "🧹 Đang quét toàn bộ các workflow runs..."
+          echo "🧹 Đang quét toàn bộ các workflow runs trong $REPO..."
           
-          # Lấy danh sách ID của tất cả các lần chạy (runs)
-          # --limit 1000: Bạn có thể tăng số này lên nếu có hàng ngàn lượt chạy
-          RUNS=$(gh run list --limit 1000 --json databaseId -q '.[].databaseId')
+          # Thêm flag -R $REPO để chỉ định rõ repository cho GitHub CLI
+          RUNS=$(gh run list -R "$REPO" --limit 1000 --json databaseId -q '.[].databaseId')
 
           if [ -z "$RUNS" ]; then
             echo "✅ Không tìm thấy lượt chạy nào để xóa."
@@ -24,8 +25,8 @@ jobs:
 
           echo "🗑️ Đang xóa các lượt chạy..."
           for RUN_ID in $RUNS; do
-            # Chúng ta dùng "|| true" để nếu có lỗi (ví dụ chính nó đang chạy) thì script vẫn tiếp tục
-            gh run delete $RUN_ID || true
+            # Thêm -R $REPO ở đây nữa để lệnh delete biết xóa ở đâu
+            gh run delete -R "$REPO" "$RUN_ID" || true
           done
 
           echo "✅ Đã dọn dẹp xong toàn bộ lịch sử."
