@@ -2633,6 +2633,35 @@ fi
 
 # 6 & 7. Network & Platform Upgrade (Giữ nguyên logic AWK an toàn)
 # ... [Phần 6 và 7 của bạn giữ nguyên] ...
+# 6. File: .../base-files/etc/board.d/02_network
+# Thêm switch config
+awk '/lenovo,newifi-y1s\)/ {
+    print "\txiaomi,miwifi-r3)"
+    print "\t\tucidef_add_switch \"switch0\" \\"
+    print "\t\t\t\"1:lan\" \"4:lan\" \"0:wan\" \"6@eth0\""
+    print "\t\t;;"
+} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+
+# Thêm MAC config
+awk '/zyxel,keenetic-lite-iii-a\)/ {
+    print "\txiaomi,miwifi-r3)"
+    print "\t\twan_mac=$(mtd_get_mac_binary factory 0x28)"
+    print "\t\tlan_mac=$(macaddr_setbit_la \"$wan_mac\")"
+    print "\t\t;;"
+} { print }' target/linux/ramips/mt7620/base-files/etc/board.d/02_network > temp.net && mv temp.net target/linux/ramips/mt7620/base-files/etc/board.d/02_network
+
+# 7. File: .../base-files/lib/upgrade/platform.sh
+awk '/\*\)/ && !done {
+    print "\txiaomi,miwifi-r3)"
+    print "\t\t# this make it compatible with breed"
+    print "\t\tdd if=/dev/mtd0 bs=64 count=1 2>/dev/null | grep -qi breed && CI_KERNPART_EXT=\"kernel_stock\""
+    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi X-WRT && CI_KERNPART_EXT=\"kernel_stock\""
+    print "\t\tdd if=/dev/mtd7 bs=64 count=1 2>/dev/null | grep -o MIPS.*Linux | grep -qi NATCAP && CI_KERNPART_EXT=\"kernel0_rsvd\""
+    print "\t\tdd if=/dev/mtd0 2>/dev/null | grep -qi pb-boot && CI_KERNPART_EXT=\"kernel_stock\""
+	print "\t\tnand_do_upgrade \"$1\""
+    print "\t\t;;"
+    done=1
+} { print }' target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh > temp.sh && mv temp.sh target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
 
 # 8. Kernel Config (Sửa lỗi "Enable UBI" bằng cách khai báo đầy đủ phụ thuộc)
 CONF_FILE="target/linux/ramips/mt7620/config-6.12"
