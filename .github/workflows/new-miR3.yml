@@ -81,8 +81,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '24' # Sử dụng bản LTS để ổn định nhất
-        cache: 'npm'       # Tối ưu: Bật cache để những lần chạy sau nhanh hơn
-
+        
     - name: Install BATS
       run: |
         npm install -g bats
