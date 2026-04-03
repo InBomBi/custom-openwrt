@@ -1,165 +1,28 @@
+# Target (Giữ nguyên)
 CONFIG_TARGET_ramips=y
 CONFIG_TARGET_ramips_mt7620=y
 CONFIG_TARGET_ramips_mt7620_DEVICE_xiaomi_miwifi-r3=y
-# CONFIG_KERNEL_BTRFS_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_CIFS_ACL is not set
-# CONFIG_KERNEL_EROFS_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_EXT4_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_EXT4_FS_SECURITY is not set
-# CONFIG_KERNEL_F2FS_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_F2FS_FS_SECURITY is not set
-# CONFIG_KERNEL_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_HFSPLUS_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_HFS_FS_POSIX_ACL is not set
-CONFIG_KERNEL_IO_URING=y
-# CONFIG_KERNEL_JFFS2_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_JFFS2_FS_SECURITY is not set
-# CONFIG_KERNEL_JFS_POSIX_ACL is not set
-# CONFIG_KERNEL_NET_L3_MASTER_DEV is not set
-# CONFIG_KERNEL_NFS_ACL_SUPPORT is not set
-# CONFIG_KERNEL_REISER_FS_POSIX_ACL is not set
-# CONFIG_KERNEL_TMPFS_POSIX_ACL is not set
-# CONFIG_KERNEL_UBIFS_FS_SECURITY is not set
-# CONFIG_KERNEL_XFS_POSIX_ACL is not set
-# CONFIG_LUA_ECO_MBEDTLS is not set
-CONFIG_LUA_ECO_WOLFSSL=y
-CONFIG_LUCI_LANG_ru=y
-# CONFIG_PACKAGE_TAR_POSIX_ACL is not set
-# CONFIG_PACKAGE_TAR_XATTR is not set
+
+# Hệ thống file cho USB (Nếu có cắm ổ cứng/USB)
 CONFIG_PACKAGE_block-mount=y
-CONFIG_PACKAGE_ca-bundle=y
-CONFIG_PACKAGE_ca-certificates=y
-CONFIG_PACKAGE_cgi-io=y
-# CONFIG_PACKAGE_dnsmasq is not set
-CONFIG_PACKAGE_fdisk=y
-CONFIG_PACKAGE_firewall=y
-# CONFIG_PACKAGE_firewall4 is not set
-CONFIG_PACKAGE_ip-tiny=y
-CONFIG_PACKAGE_iptables-mod-ipopt=y
-CONFIG_PACKAGE_iptables-nft=y
-CONFIG_PACKAGE_iwinfo=y
-CONFIG_PACKAGE_kmod-crypto-sha256=y
 CONFIG_PACKAGE_kmod-fs-exfat=y
 CONFIG_PACKAGE_kmod-fs-ext4=y
-CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_kmod-fs-vfat=y
-CONFIG_PACKAGE_kmod-ifb=y
-CONFIG_PACKAGE_kmod-ipt-conntrack=y
-CONFIG_PACKAGE_kmod-ipt-core=y
-CONFIG_PACKAGE_kmod-ipt-ipopt=y
-CONFIG_PACKAGE_kmod-ipt-nat=y
-CONFIG_PACKAGE_kmod-lib-crc16=y
-CONFIG_PACKAGE_kmod-mii=y
-CONFIG_PACKAGE_kmod-nf-flow=y
-CONFIG_PACKAGE_kmod-nf-ipt=y
-CONFIG_PACKAGE_kmod-nft-compat=y
-CONFIG_PACKAGE_kmod-nft-offload=y
-CONFIG_PACKAGE_kmod-nls-cp437=y
-CONFIG_PACKAGE_kmod-nls-iso8859-1=y
 CONFIG_PACKAGE_kmod-nls-utf8=y
-# CONFIG_PACKAGE_kmod-pppoe is not set
-CONFIG_PACKAGE_kmod-sched-cake=y
-CONFIG_PACKAGE_kmod-sched-core=y
-CONFIG_PACKAGE_kmod-scsi-core=y
-CONFIG_PACKAGE_kmod-usb-net=y
-CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
-CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
-CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=y
-CONFIG_PACKAGE_kmod-usb-net-rndis=y
-CONFIG_PACKAGE_kmod-usb-serial=y
 CONFIG_PACKAGE_kmod-usb-storage=y
-CONFIG_PACKAGE_kmod-usb-storage-extras=y
 CONFIG_PACKAGE_kmod-usb-storage-uas=y
-CONFIG_PACKAGE_kmod-usb-wdm=y
-# CONFIG_PACKAGE_knot-resolver_dnstap is not set
-CONFIG_PACKAGE_libatomic=y
-CONFIG_PACKAGE_libblkid=y
-CONFIG_PACKAGE_libfdisk=y
-CONFIG_PACKAGE_libip4tc=y
-CONFIG_PACKAGE_libip6tc=y
-CONFIG_PACKAGE_libiptext=y
-CONFIG_PACKAGE_libiptext-nft=y
-CONFIG_PACKAGE_libiptext6=y
-CONFIG_PACKAGE_libiwinfo=y
-CONFIG_PACKAGE_libiwinfo-data=y
-CONFIG_PACKAGE_libiwinfo-lua=y
-CONFIG_PACKAGE_liblua=y
-CONFIG_PACKAGE_liblucihttp=y
-CONFIG_PACKAGE_liblucihttp-lua=y
-CONFIG_PACKAGE_liblucihttp-ucode=y
-CONFIG_PACKAGE_libncurses=y
-CONFIG_PACKAGE_libpthread=y
-CONFIG_PACKAGE_librt=y
-CONFIG_PACKAGE_libsmartcols=y
-CONFIG_PACKAGE_libubus-lua=y
-CONFIG_PACKAGE_libusb-1.0=y
-# CONFIG_PACKAGE_libustream-mbedtls is not set
-CONFIG_PACKAGE_libustream-wolfssl=y
-CONFIG_PACKAGE_libuuid=y
-CONFIG_PACKAGE_libwolfssl=y
-CONFIG_PACKAGE_libxtables=y
-CONFIG_PACKAGE_lua=y
-CONFIG_PACKAGE_luci=y
-CONFIG_PACKAGE_luci-app-firewall=y
-CONFIG_PACKAGE_luci-app-package-manager=y
-CONFIG_PACKAGE_luci-app-sqm=y
-CONFIG_PACKAGE_luci-app-watchcat=y
-CONFIG_PACKAGE_luci-base=y
-CONFIG_PACKAGE_luci-i18n-base-ru=y
-CONFIG_PACKAGE_luci-i18n-firewall-ru=y
-CONFIG_PACKAGE_luci-i18n-package-manager-ru=y
-CONFIG_PACKAGE_luci-i18n-sqm-ru=y
-CONFIG_PACKAGE_luci-i18n-watchcat-ru=y
-CONFIG_PACKAGE_luci-lib-base=y
-CONFIG_PACKAGE_luci-lib-ip=y
-CONFIG_PACKAGE_luci-lib-jsonc=y
-CONFIG_PACKAGE_luci-lib-nixio=y
-CONFIG_PACKAGE_luci-lib-uqr=y
-CONFIG_PACKAGE_luci-light=y
-CONFIG_PACKAGE_luci-mod-admin-full=y
-CONFIG_PACKAGE_luci-mod-network=y
-CONFIG_PACKAGE_luci-mod-status=y
-CONFIG_PACKAGE_luci-mod-system=y
-CONFIG_PACKAGE_luci-proto-ipv6=y
-CONFIG_PACKAGE_luci-proto-ppp=y
-CONFIG_PACKAGE_luci-theme-bootstrap=y
-CONFIG_PACKAGE_luci-theme-openwrt-2020=y
-# CONFIG_PACKAGE_odhcp6c is not set
-# CONFIG_PACKAGE_odhcpd-ipv6only is not set
-CONFIG_PACKAGE_opkg=y
-# CONFIG_PACKAGE_ppp-mod-pppoe is not set
-CONFIG_PACKAGE_rpcd=y
-CONFIG_PACKAGE_rpcd-mod-file=y
-CONFIG_PACKAGE_rpcd-mod-iwinfo=y
-CONFIG_PACKAGE_rpcd-mod-luci=y
-CONFIG_PACKAGE_rpcd-mod-rrdns=y
-CONFIG_PACKAGE_rpcd-mod-ucode=y
-CONFIG_PACKAGE_sqm-scripts=y
-CONFIG_PACKAGE_tc-tiny=y
-CONFIG_PACKAGE_terminfo=y
-CONFIG_PACKAGE_ucode-mod-html=y
-CONFIG_PACKAGE_ucode-mod-log=y
-CONFIG_PACKAGE_ucode-mod-math=y
-CONFIG_PACKAGE_uhttpd=y
-CONFIG_PACKAGE_uhttpd-mod-ubus=y
-CONFIG_PACKAGE_usb-modeswitch=y
-CONFIG_PACKAGE_watchcat=y
-# CONFIG_PACKAGE_wpad-basic-mbedtls is not set
-CONFIG_PACKAGE_wpad-wolfssl=y
-CONFIG_PACKAGE_xtables-nft=y
-# CONFIG_USE_FS_ACL_ATTR is not set
-CONFIG_WOLFSSL_HAS_NO_HW=y
-CONFIG_WPA_WOLFSSL=y
-CONFIG_PACKAGE_jansson=y
-CONFIG_PACKAGE_kmod-nft-fib=y
-CONFIG_PACKAGE_kmod-pppox=y
-CONFIG_PACKAGE_nftables-json=y
-CONFIG_PACKAGE_luci-app-wifischedule=y
-CONFIG_PACKAGE_chrony-nts=y
-CONFIG_PACKAGE_apk-mbedtls=y
+
+# Tối ưu hóa mạng (Nên giữ)
+CONFIG_PACKAGE_kmod-sched-cake=y
+CONFIG_PACKAGE_luci-app-sqm=y # Giúp giảm lag khi chơi game/xem phim
+
+# Wifi (Bắt buộc cho R3)
 CONFIG_PACKAGE_kmod-mt7603=y
 CONFIG_PACKAGE_kmod-mt76x2=y
-CONFIG_PACKAGE_wpa-mesh-mbedtls=y
-CONFIG_PACKAGE_luci-proto-batman-adv=y
-CONFIG_PACKAGE_kmod-batman-adv=y
-CONFIG_PACKAGE_batctl-full=y
+CONFIG_PACKAGE_wpad-wolfssl=y # Bản đầy đủ để hỗ trợ mesh/802.11r
+
+# Giao diện (Rút gọn)
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-app-firewall=y
+CONFIG_PACKAGE_luci-theme-edge=y # Hoặc bootstrap cho nhẹ
+# CONFIG_LUCI_LANG_ru is not set
