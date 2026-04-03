@@ -28,7 +28,7 @@ fi
 
 # 3. Cấu hình Image Makefile
 sed -i 's/Device\/tplink-4mlzma/Device\/tplink-16mlzma/g' target/linux/ath79/image/tiny-tp-link.mk
-patch_by_awk "target/linux/ramips/mt7620/target.mk" "FEATURES\+=usb" "FEATURES+=nand" "after"
+patch_by_awk "target/linux/ramips/mt7620/target.mk" "FEATURES+=usb" "FEATURES+=nand" "after"
 
 # 4. Tạo các file mới cho Xiaomi R3 (DTS & NAND Driver)
 mkdir -p target/linux/ramips/dts/
