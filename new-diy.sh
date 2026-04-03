@@ -1,11 +1,10 @@
 #!/bin/bash
-
-# --- Hàm hỗ trợ chèn nội dung an toàn ---
 patch_by_awk() {
     local file=$1 pattern=$2 content=$3 pos=$4
     if [ -f "$file" ] && ! grep -qF "$content" "$file"; then
+        # Sử dụng index() thay vì regex ~ để tránh lỗi Trailing backslash
         awk -v content="$content" -v pat="$pattern" -v pos="$pos" '
-            $0 ~ pat {
+            index($0, pat) {
                 if(pos=="before") print content;
                 print $0;
                 if(pos=="after") print content;
@@ -14,10 +13,10 @@ patch_by_awk() {
         ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
     fi
 }
-
-# 1. Cấu hình uboot-envtools
+# 1. Cấu hình uboot-envtools (Sửa lỗi Trailing backslash)
 patch_by_awk "package/boot/uboot-tools/uboot-envtools/files/ramips" \
-    "xiaomi,mi-router-4|\\\\" " xiaomi,miwifi-r3|\\\\" "after"
+    "xiaomi,mi-router-4" " xiaomi,miwifi-r3|\\\\" "after"
+
 
 # 2. Cấu hình DTS cho TPLINK WR841
 DTS_WR841="target/linux/ath79/dts/qca9533_tplink_tl-wr841.dtsi"
