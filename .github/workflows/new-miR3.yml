@@ -215,21 +215,47 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
         make defconfig
         
+    # - name: SSH connection to Actions
+    #   uses: P3TERX/ssh2actions@v1.0.0
+    #   if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+    #   env:
+    #     TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    #     TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    # - name: Download package
+    #   id: package
+    #   run: |
+    #     cd openwrt
+    #     make defconfig
+    #     make download -j$(nproc)
+    #     find dl -size -1024c -exec ls -l {} \;
+    #     find dl -size -1024c -exec rm -f {} \;
     - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      uses: P3TERX/ssh2actions@main # Dùng @main để cập nhật các bản vá tmate mới nhất
+      if: (github.event.inputs.ssh == 'true' || github.event.inputs.ssh == true)
       env:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: Cache DL directory
+      uses: actions/cache@v4
+      with:
+        path: openwrt/dl
+        key: ${{ runner.os }}-openwrt-dl-${{ hashFiles('**/feeds.conf.default') }}-${{ hashFiles('**/.config*') }}
+        restore-keys: |
+          ${{ runner.os }}-openwrt-dl-
 
     - name: Download package
       id: package
       run: |
         cd openwrt
         make defconfig
-        make download -j$(nproc)
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+        # Tải mã nguồn và tự động thử lại nếu lỗi
+        make download -j$(nproc) || make download -j$(nproc) || make download -j1 V=s
+        
+        # Dọn dẹp file lỗi gọn gàng hơn
+        find dl -size -1024c -delete
+        echo "status=success" >> $GITHUB_OUTPUT
 
     # - name: Read config target
     #   run: |
@@ -295,16 +321,33 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
+    # - name: Check space usage
+    #   if: (!cancelled())
+    #   run: df -hT
+
+    # - name: Upload bin directory
+    #   uses: actions/upload-artifact@main
+    #   if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+    #   with:
+    #     name: openwrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+    #     path: openwrt/bin
     - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
+      if: always() # Luôn chạy để kiểm soát tài nguyên
+      run: |
+        echo "Disk space usage after build:"
+        df -hT .
 
     - name: Upload bin directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4 # Cố định phiên bản v4 ổn định
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: openwrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        # Tên file rõ ràng hơn: openwrt_bin_Xiaomi-R3_20260403
+        name: openwrt_bin_${{ env.DEVICE_NAME }}_${{ env.FILE_DATE }}
         path: openwrt/bin
+        # Tối ưu: Chỉ giữ lại 7 ngày thay vì 90 ngày mặc định để tiết kiệm dung lượng tài khoản
+        retention-days: 7
+        # Tối ưu: Nén mức độ cao để tải lên nhanh hơn
+        compression-level: 9
 
     # - name: Organize files
     #   id: organize
