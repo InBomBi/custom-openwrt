@@ -363,7 +363,7 @@ jobs:
     steps:
       # Tối ưu 1: Sử dụng action phổ biến và ổn định hơn
       - name: Delete workflow runs
-        uses: Mattraiano/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
