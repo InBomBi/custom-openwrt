@@ -50,6 +50,8 @@ env:
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Ho_Chi_Minh
+  FILE_DATE: _$(date +"%Y%m%d%H%M") # Thêm dòng này để đánh dấu thời gian build
+  DEVICE_NAME: Xiaomi-R3           # Đặt tên thiết bị ở đây để dùng cho Release Tag
  
 jobs:
           
@@ -236,6 +238,19 @@ jobs:
       env:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        
+    - name: Telegram notification
+      uses: appleboy/telegram-action@master
+      if: always() # Chạy kể cả khi build lỗi để bạn biết mà kiểm tra
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          🚀 Build OpenWrt xong rồi!
+          📱 Thiết bị: ${{ env.DEVICE_NAME }}
+          🌿 Nhánh: ${{ env.REPO_BRANCH }}
+          📊 Trạng thái: ${{ job.status }}
+          🔗 Xem tại: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     - name: Cache DL directory
       uses: actions/cache@v4
