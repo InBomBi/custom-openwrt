@@ -157,3 +157,9 @@ CONFIG_PACKAGE_nftables-json=y
 CONFIG_PACKAGE_luci-app-wifischedule=y
 CONFIG_PACKAGE_chrony-nts=y
 CONFIG_PACKAGE_apk-mbedtls=y
+CONFIG_PACKAGE_kmod-mt7603=y
+CONFIG_PACKAGE_kmod-mt76x2=y
+CONFIG_PACKAGE_wpa-mesh-mbedtls=y
+CONFIG_PACKAGE_luci-proto-batman-adv
+CONFIG_PACKAGE_kmod-batman-adv
+CONFIG_PACKAGE_batctl-full
