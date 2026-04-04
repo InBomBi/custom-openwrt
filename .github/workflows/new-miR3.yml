@@ -22,15 +22,6 @@ on:
         required: false
         type: boolean    # Thay đổi từ string sang boolean để có checkbox
         default: false   # Kiểu boolean không cần dấu ngoặc kép
-# on:
-#   repository_dispatch:
-#   workflow_dispatch:
-#     inputs:
-#       ssh:
-#         description: 'SSH connection to Actions'
-#         required: false
-#         default: 'false'
-
 env:
   REPO_URL: https://github.com/openwrt/openwrt.git
   REPO_BRANCH: main
@@ -65,17 +56,6 @@ jobs:
       run: |
         gh run list --workflow "${{ github.workflow }}" --limit 100 --json databaseId,status -q '.[] | select(.status != "in_progress") | .databaseId' | xargs -I {} gh run delete {} || true
 # --- CÁC STEP BUILD CỦA BẠN TIẾP TỤC TỪ ĐÂY ---
-    # - name: Checkout
-    #   uses: actions/checkout@v4
-      
-    # - name: Setup Node
-    #   uses: actions/setup-node@v4
-    #   with:
-    #    node-version: '24'
-    # - name: install npm
-    #   run: npm install -g bats
-    # - name: install bats
-    #   run: bats -v
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -101,12 +81,6 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$(id -gn) /workdir
 
-    # - name: Clone source code
-    #   working-directory: /workdir
-    #   run: |
-    #     df -hT $PWD
-    #     git clone $REPO_URL -b $REPO_BRANCH openwrt
-    #     ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -140,46 +114,7 @@ jobs:
         ccache --set-config=max_size=2G
         ccache --set-config=compression=true
         ccache -z # Clear statistics for a clean log of this specific build
-  
-    # - name: Load custom feeds
-    #   run: |
-    #     [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-    #     chmod +x $DIY_P1_SH
-    #     cd openwrt
-    #     $GITHUB_WORKSPACE/$DIY_P1_SH
-          
-    # - name: Update feeds
-    #   run: cd openwrt && ./scripts/feeds update -a
 
-    # - name: Install feeds
-    #   run: cd openwrt && ./scripts/feeds install -a
-
-    # - name: Load custom configuration
-    #   env:
-    #     check: 0
-    #   run: |
-    #     [ -e files ] && mv files openwrt/files
-    #     if [ -e $CONFIG_FILE ];
-    #     then mv $CONFIG_FILE openwrt/.config;
-    #          echo "Use .config from repo";
-    #     else if [ ! -z "$ALT_CONFIG_URL" ];
-    #          then curl -Lo openwrt/.config $ALT_CONFIG_URL;
-    #               echo "successfully download .config from url, .config in repo don't exist";
-    #               echo "checking .config";
-    #               check=$(grep -e "^# Automatically generated file; DO NOT EDIT.$" openwrt/.config && grep -e "^# OpenWrt Configuration$" openwrt/.config);
-    #               if [ ! "$(echo $check |wc -c)" = "69" ];
-    #               then echo ".config invalid, setting default for mt7620";
-    #                    rm -rf openwrt/.config;
-    #                    cp openwrt/feeds/x/rom/lede/config.ramips-mt7620 openwrt/.config;
-    #               else echo "naive check passed";
-    #               fi
-    #          else cp openwrt/feeds/x/rom/lede/config.ramips-mt7620 openwrt/.config;
-    #               echo "use default .config for mt7620 in openwrt, url not set and .config in repo don't exist";
-    #          fi
-    #     fi
-    #     chmod +x $DIY_P2_SH
-    #     cd openwrt
-    #     $GITHUB_WORKSPACE/$DIY_P2_SH
     - name: Load custom feeds
       run: |
         [ -e "$FEEDS_CONF" ] && mv "$FEEDS_CONF" openwrt/feeds.conf.default
@@ -216,22 +151,7 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
         make defconfig
-        
-    # - name: SSH connection to Actions
-    #   uses: P3TERX/ssh2actions@v1.0.0
-    #   if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-    #   env:
-    #     TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-    #     TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-    # - name: Download package
-    #   id: package
-    #   run: |
-    #     cd openwrt
-    #     make defconfig
-    #     make download -j$(nproc)
-    #     find dl -size -1024c -exec ls -l {} \;
-    #     find dl -size -1024c -exec rm -f {} \;
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@main # Dùng @main để cập nhật các bản vá tmate mới nhất
       if: (github.event.inputs.ssh == 'true' || github.event.inputs.ssh == true)
@@ -239,18 +159,18 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         
-    - name: Telegram notification
-      uses: appleboy/telegram-action@master
-      if: always() # Chạy kể cả khi build lỗi để bạn biết mà kiểm tra
-      with:
-        to: ${{ secrets.TELEGRAM_CHAT_ID }}
-        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        message: |
-          🚀 Build OpenWrt xong rồi!
-          📱 Thiết bị: ${{ env.DEVICE_NAME }}
-          🌿 Nhánh: ${{ env.REPO_BRANCH }}
-          📊 Trạng thái: ${{ job.status }}
-          🔗 Xem tại: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    # - name: Telegram notification
+    #   uses: appleboy/telegram-action@master
+    #   if: always() # Chạy kể cả khi build lỗi để bạn biết mà kiểm tra
+    #   with:
+    #     to: ${{ secrets.TELEGRAM_CHAT_ID }}
+    #     token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    #     message: |
+    #       🚀 Build OpenWrt xong rồi!
+    #       📱 Thiết bị: ${{ env.DEVICE_NAME }}
+    #       🌿 Nhánh: ${{ env.REPO_BRANCH }}
+    #       📊 Trạng thái: ${{ job.status }}
+    #       🔗 Xem tại: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     - name: Cache DL directory
       uses: actions/cache@v4
@@ -271,16 +191,7 @@ jobs:
         # Dọn dẹp file lỗi gọn gàng hơn
         find dl -size -1024c -delete
         echo "status=success" >> $GITHUB_OUTPUT
-
-    # - name: Read config target
-    #   run: |
-    #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/^CONFIG_TARGET_(.*)_(.*)_DEVICE_(.*)=y/\1/' > ARCH_NAME
-    #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/^CONFIG_TARGET_(.*)_(.*)_DEVICE_(.*)=y/\2/' > CPU_NAME
-    #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/^CONFIG_TARGET_(.*)_(.*)_DEVICE_(.*)=y/\3/' > DEVICE_NAME
-    #     [ -s ARCH_NAME ] && echo "ARCH_NAME=$(cat ARCH_NAME)" >> $GITHUB_ENV
-    #     [ -s CPU_NAME ] && echo "CPU_NAME=$(cat CPU_NAME)" >> $GITHUB_ENV
-    #     [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
-    #     echo -e "Arch: $(cat ARCH_NAME)\nCPU: $(cat CPU_NAME)\nDevice: $(cat DEVICE_NAME)"   
+  
     - name: Read config target
       run: |
         # Xác định file cấu hình: Ưu tiên file đã copy vào openwrt/.config, 
@@ -336,16 +247,6 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-    # - name: Check space usage
-    #   if: (!cancelled())
-    #   run: df -hT
-
-    # - name: Upload bin directory
-    #   uses: actions/upload-artifact@main
-    #   if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-    #   with:
-    #     name: openwrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #     path: openwrt/bin
     - name: Check space usage
       if: always() # Luôn chạy để kiểm soát tài nguyên
       run: |
@@ -364,21 +265,6 @@ jobs:
         # Tối ưu: Nén mức độ cao để tải lên nhanh hơn
         compression-level: 9
 
-    # - name: Organize files
-    #   id: organize
-    #   if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-    #   run: |
-    #     cd openwrt/bin/targets/*/*
-    #     rm -rf packages
-    #     echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-    #     echo "status=success" >> $GITHUB_OUTPUT
-
-    # - name: Upload firmware directory
-    #   uses: actions/upload-artifact@main
-    #   if: steps.organize.outputs.status == 'success' && !cancelled()
-    #   with:
-    #     name: openwrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #     path: ${{ env.FIRMWARE }}
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
@@ -402,49 +288,7 @@ jobs:
         name: openwrt_firmware_${{ env.DEVICE_NAME }}_${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
         retention-days: 7 # Tối ưu: Chỉ giữ file trong 7 ngày để tiết kiệm dung lượng kho lưu trữ
-        
-    # - name: Upload firmware to cowtransfer
-    #   id: cowtransfer
-    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-    #   run: |
-    #     curl -fsSL git.io/file-transfer | sh
-    #     ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-    #     echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-    #     echo "url=$(cat cowtransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
 
-    # - name: Upload firmware to WeTransfer
-    #   id: wetransfer
-    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
-    #   run: |
-    #     curl -fsSL git.io/file-transfer | sh
-    #     ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-    #     echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-    #     echo "url=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
-
-    # - name: Generate release tag
-    #   id: tag
-    #   if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-    #   run: |
-    #     echo "release_tag=$DEVICE_NAME"_$(date +"%Y%m%d") >> $GITHUB_OUTPUT
-    #     touch release.txt
-    #     echo "Branch: $REPO_BRANCH" >> release.txt
-    #     echo "Date: $(date +"%Y-%m-%d_%H:%M")" >> release.txt
-    #     # echo "Arch: $ARCH_NAME" >> release.txt
-    #     # echo "CPU: $CPU_NAME" >> release.txt
-    #     echo "Deivce: $DEVICE_NAME" >> release.txt
-    #     [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
-    #     [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
-    #     echo "status=success" >> $GITHUB_OUTPUT
-
-    # - name: Upload firmware to release
-    #   uses: softprops/action-gh-release@v2
-    #   if: steps.tag.outputs.status == 'success' && !cancelled()
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
-    #   with:
-    #     tag_name: ${{ steps.tag.outputs.release_tag }}
-    #     body_path: release.txt
-    #     files: ${{ env.FIRMWARE }}/*
     - name: Generate release tag
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
@@ -509,3 +353,21 @@ jobs:
         env:
           # Thay PAT bằng GITHUB_TOKEN mặc định nếu có thể
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  notify:
+    name: Telegram notification
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [build, clean] # Chờ cả 2 job build và clean xong mới chạy
+    steps:
+      - name: Send Notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🚀 Toàn bộ quy trình đã xong!
+            📱 Thiết bị: ${{ env.DEVICE_NAME }}
+            🌿 Nhánh: ${{ env.REPO_BRANCH }}
+            📊 Kết quả Build: ${{ needs.build.result }}
+            🧹 Kết quả Clean: ${{ needs.clean.result }}
+            🔗 Xem tại: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
