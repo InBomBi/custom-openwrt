@@ -122,6 +122,8 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
         ./scripts/feeds update -a
+        # Bước 2: Cài đặt cụ thể các gói "khó tính" hoặc bị thiếu (như libpam, python3-socks...)
+        ./scripts/feeds install libpam python3-pysocks python3-unidecode
         ./scripts/feeds install -a
 
     - name: Load custom configuration
