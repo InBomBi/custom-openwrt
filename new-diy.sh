@@ -2681,26 +2681,37 @@ CONFIG_LZO_DECOMPRESS=y
 EOF
 fi
 
-# 9. Tạo file Patch cho Kernel (Cách an toàn nhất để Kernel nhận Driver)
-mkdir -p target/linux/ramips/patches-6.12/
-cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
+# # 9. Tạo file Patch cho Kernel (Cách an toàn nhất để Kernel nhận Driver)
+# mkdir -p target/linux/ramips/patches-6.12/
+# cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
+# --- a/drivers/mtd/maps/Kconfig
+# +++ b/drivers/mtd/maps/Kconfig
+# @@ -378,4 +378,8 @@ config MTD_PISMO
+ 
+#  	  When built as a module, it will be called pismo.ko
+ 
+# +config MTD_NAND_MT7620
+# +	tristate "Support for NAND on Mediatek MT7620"
+# +	depends on RALINK && SOC_MT7620
+# +
+#  endmenu
+# --- a/drivers/mtd/maps/Makefile
+# +++ b/drivers/mtd/maps/Makefile
+# @@ -41,3 +41,4 @@ obj-$(CONFIG_MTD_SCB2_FLASH)	+= scb2_fla
+#  obj-$(CONFIG_MTD_PLATRAM)	+= plat-ram.o
+#  obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
+#  obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
+# +obj-$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o
+# EOF
+
+# 9. Tạo patch chỉ dựa vào từ khóa "endmenu", không quan tâm số dòng phía trên
+cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-nand.patch
 --- a/drivers/mtd/maps/Kconfig
 +++ b/drivers/mtd/maps/Kconfig
-@@ -378,4 +378,8 @@ config MTD_PISMO
- 
- 	  When built as a module, it will be called pismo.ko
- 
+@@ -1,1 +1,5 @@
 +config MTD_NAND_MT7620
 +	tristate "Support for NAND on Mediatek MT7620"
 +	depends on RALINK && SOC_MT7620
 +
  endmenu
---- a/drivers/mtd/maps/Makefile
-+++ b/drivers/mtd/maps/Makefile
-@@ -41,3 +41,4 @@ obj-$(CONFIG_MTD_SCB2_FLASH)	+= scb2_fla
- obj-$(CONFIG_MTD_PLATRAM)	+= plat-ram.o
- obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
- obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
-+obj-$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o
 EOF
-
