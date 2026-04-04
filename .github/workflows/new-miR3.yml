@@ -125,31 +125,34 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-        # --- ĐOẠN SỬA LỖI TỐI ƯU ---
-        echo "Fixing Python dependencies and OnionShare-CLI..."
-        # 1. Phá vỡ vòng lặp Python3 (Giữ cả 2 gói nhưng ngắt liên kết tự động)
-        # Chúng ta dùng 'sed' để xóa các phụ thuộc chéo trong Makefile của python3
+        # --- BẮT ĐẦU SỬA LỖI RECURSIVE & MISSING DEPENDENCY ---
+        echo "Breaking Python3 recursive dependency loop..."
+        
+        # Tìm chính xác file Makefile của Python3 base
+        # Lệnh này sẽ xóa '+python3-email' khỏi 'python3-urllib' VÀ ngược lại
+        # Chúng ta dùng đường dẫn rộng để đảm bảo trúng đích trong thư mục feeds
         find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-urllib//g' {} +
         find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-email//g' {} +
 
-        # 2. Sửa lỗi OnionShare-CLI (Fix lỗi 'does not exist')
-        # Gói 'python3-socks' thực chất là 'python3-pysocks' hoặc ngược lại tùy bản feed
-        # Gói 'python3-unidecode' thường bị thiếu, ta sẽ tạm xóa nó khỏi dependency để build trôi
-        if [ -d "package/feeds/packages/onionshare-cli" ]; then
-          # Thử đổi tên socks về tên chuẩn trong feed mới
-          sed -i 's/python3-pysocks/python3-socks/g' package/feeds/packages/onionshare-cli/Makefile || true
-          sed -i 's/python3-socks/python3-pysocks/g' package/feeds/packages/onionshare-cli/Makefile || true
-          
-          # Xóa bỏ yêu cầu 'unidecode' vì nó thường gây lỗi không tìm thấy gói
-          sed -i 's/+python3-unidecode//g' package/feeds/packages/onionshare-cli/Makefile
+        echo "Fixing OnionShare-CLI dependencies..."
+        # Sửa lỗi thiếu python3-pysocks/python3-unidecode của OnionShare
+        # Vì bạn dùng MiWiFi Mini 16MB, tốt nhất là xóa các phụ thuộc này để build trôi
+        ONION_MAKEFILE="package/feeds/packages/onionshare-cli/Makefile"
+        if [ -f "$ONION_MAKEFILE" ]; then
+          sed -i 's/+python3-pysocks//g' "$ONION_MAKEFILE"
+          sed -i 's/+python3-unidecode//g' "$ONION_MAKEFILE"
+          sed -i 's/+python3-socks//g' "$ONION_MAKEFILE"
         fi
 
-        # 3. QUAN TRỌNG: Xóa sạch cache cấu hình cũ
+        # 2. BƯỚC QUAN TRỌNG NHẤT: Xóa sạch thư mục tmp và các file config tạm
+        # Nếu không xóa cái này, OpenWrt sẽ liên tục báo lỗi cũ từ bộ nhớ đệm
         rm -rf tmp/
+        rm -f .config*
         
-        # 4. Cài đặt lại feeds một lần cuối để đồng bộ hóa
+        # 3. Cài đặt lại feeds để cập nhật các thay đổi vừa sed vào hệ thống
         ./scripts/feeds install -a
-        # --- KẾT THÚC ĐOẠN BỔ SUNG ---
+        
+        # --- KẾT THÚC SỬA LỖI ---
         
     - name: Load custom configuration
       run: |
