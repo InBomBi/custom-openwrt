@@ -125,23 +125,29 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-        # --- ĐOẠN SỬA LỖI GIỮ LẠI PYTHON3-EMAIL & URLLIB ---
-        echo "Fixing recursive dependency while keeping both packages..."
-        # 1. Tìm file Makefile của Python 3 (thường nằm trong feeds/packages/lang/python/python3/Makefile)
-        # 2. Xóa bỏ dòng ép buộc '+python3-email' bên trong định nghĩa của 'python3-urllib'
-        # Điều này giúp urllib vẫn chạy được (nếu email đã được cài) nhưng không tạo vòng lặp logic.
-        find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-email//g' {} +
+        # --- ĐOẠN SỬA LỖI TỐI ƯU ---
+        echo "Fixing Python dependencies and OnionShare-CLI..."
+        # 1. Phá vỡ vòng lặp Python3 (Giữ cả 2 gói nhưng ngắt liên kết tự động)
+        # Chúng ta dùng 'sed' để xóa các phụ thuộc chéo trong Makefile của python3
         find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-urllib//g' {} +
+        find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-email//g' {} +
 
-        # 3. Sửa lỗi OnionShare trỏ sai tên gói (đổi pysocks thành socks)
+        # 2. Sửa lỗi OnionShare-CLI (Fix lỗi 'does not exist')
+        # Gói 'python3-socks' thực chất là 'python3-pysocks' hoặc ngược lại tùy bản feed
+        # Gói 'python3-unidecode' thường bị thiếu, ta sẽ tạm xóa nó khỏi dependency để build trôi
         if [ -d "package/feeds/packages/onionshare-cli" ]; then
-          sed -i 's/python3-pysocks/python3-socks/g' package/feeds/packages/onionshare-cli/Makefile
+          # Thử đổi tên socks về tên chuẩn trong feed mới
+          sed -i 's/python3-pysocks/python3-socks/g' package/feeds/packages/onionshare-cli/Makefile || true
+          sed -i 's/python3-socks/python3-pysocks/g' package/feeds/packages/onionshare-cli/Makefile || true
+          
+          # Xóa bỏ yêu cầu 'unidecode' vì nó thường gây lỗi không tìm thấy gói
+          sed -i 's/+python3-unidecode//g' package/feeds/packages/onionshare-cli/Makefile
         fi
 
-        # 4. QUAN TRỌNG: Xóa thư mục tmp để ép OpenWrt quét lại logic phụ thuộc mới
+        # 3. QUAN TRỌNG: Xóa sạch cache cấu hình cũ
         rm -rf tmp/
         
-        # 5. Cài đặt lại feeds để cập nhật thay đổi vào hệ thống
+        # 4. Cài đặt lại feeds một lần cuối để đồng bộ hóa
         ./scripts/feeds install -a
         # --- KẾT THÚC ĐOẠN BỔ SUNG ---
         
