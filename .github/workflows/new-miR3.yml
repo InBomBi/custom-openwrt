@@ -122,9 +122,24 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
         ./scripts/feeds update -a
-        # Bước 2: Cài đặt cụ thể các gói "khó tính" hoặc bị thiếu (như libpam, python3-socks...)
-        ./scripts/feeds install libpam python3-pysocks python3-unidecode
         ./scripts/feeds install -a
+        # --- BẮT ĐẦU ĐOẠN BỔ SUNG SỬA LỖI ---
+        
+        echo "Fixing Python3 recursive dependency..."
+        # Phá vỡ vòng lặp giữa python3-email và python3-urllib
+        find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-urllib//g' {} +
+        
+        echo "Fixing OnionShare-CLI dependencies..."
+        # Sửa lỗi thiếu gói python3-pysocks (đổi thành python3-socks) và xóa dependency unidecode nếu thiếu
+        if [ -d "package/feeds/packages/onionshare-cli" ]; then
+          sed -i 's/python3-pysocks/python3-socks/g' package/feeds/packages/onionshare-cli/Makefile
+          sed -i 's/+python3-unidecode//g' package/feeds/packages/onionshare-cli/Makefile
+        fi
+
+        # Xóa thư mục tạm tmp để OpenWrt quét lại cấu hình mới sau khi đã sửa Makefile
+        rm -rf tmp/
+        
+        # --- KẾT THÚC ĐOẠN BỔ SUNG ---
 
     - name: Load custom configuration
       run: |
