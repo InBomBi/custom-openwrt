@@ -121,26 +121,30 @@ jobs:
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
+        # Cập nhật và cài đặt feeds
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        # --- BẮT ĐẦU ĐOẠN BỔ SUNG SỬA LỖI ---
-        
-        echo "Fixing Python3 recursive dependency..."
-        # Phá vỡ vòng lặp giữa python3-email và python3-urllib
+
+        # --- ĐOẠN SỬA LỖI GIỮ LẠI PYTHON3-EMAIL & URLLIB ---
+        echo "Fixing recursive dependency while keeping both packages..."
+        # 1. Tìm file Makefile của Python 3 (thường nằm trong feeds/packages/lang/python/python3/Makefile)
+        # 2. Xóa bỏ dòng ép buộc '+python3-email' bên trong định nghĩa của 'python3-urllib'
+        # Điều này giúp urllib vẫn chạy được (nếu email đã được cài) nhưng không tạo vòng lặp logic.
+        find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-email//g' {} +
         find feeds/packages/lang/python/python3/ -name "Makefile" -exec sed -i 's/+python3-urllib//g' {} +
-        
-        echo "Fixing OnionShare-CLI dependencies..."
-        # Sửa lỗi thiếu gói python3-pysocks (đổi thành python3-socks) và xóa dependency unidecode nếu thiếu
+
+        # 3. Sửa lỗi OnionShare trỏ sai tên gói (đổi pysocks thành socks)
         if [ -d "package/feeds/packages/onionshare-cli" ]; then
           sed -i 's/python3-pysocks/python3-socks/g' package/feeds/packages/onionshare-cli/Makefile
-          sed -i 's/+python3-unidecode//g' package/feeds/packages/onionshare-cli/Makefile
         fi
 
-        # Xóa thư mục tạm tmp để OpenWrt quét lại cấu hình mới sau khi đã sửa Makefile
+        # 4. QUAN TRỌNG: Xóa thư mục tmp để ép OpenWrt quét lại logic phụ thuộc mới
         rm -rf tmp/
         
+        # 5. Cài đặt lại feeds để cập nhật thay đổi vào hệ thống
+        ./scripts/feeds install -a
         # --- KẾT THÚC ĐOẠN BỔ SUNG ---
-
+        
     - name: Load custom configuration
       run: |
         [ -d files ] && mv files openwrt/files
