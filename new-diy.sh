@@ -2681,18 +2681,26 @@ CONFIG_LZO_DECOMPRESS=y
 EOF
 fi
 
-# 9. Kconfig & Makefile Kernel (Sửa lỗi TAB để vượt qua syncconfig)
-KCONFIG_KERNEL="target/linux/ramips/files/drivers/mtd/maps/Kconfig"
-MAKEFILE_KERNEL="target/linux/ramips/files/drivers/mtd/maps/Makefile"
+# 9. Tạo file Patch cho Kernel (Cách an toàn nhất để Kernel nhận Driver)
+mkdir -p target/linux/ramips/patches-6.12/
+cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
+--- a/drivers/mtd/maps/Kconfig
++++ b/drivers/mtd/maps/Kconfig
+@@ -378,4 +378,8 @@ config MTD_PISMO
+ 
+ 	  When built as a module, it will be called pismo.ko
+ 
++config MTD_NAND_MT7620
++	tristate "Support for NAND on Mediatek MT7620"
++	depends on RALINK && SOC_MT7620
++
+ endmenu
+--- a/drivers/mtd/maps/Makefile
++++ b/drivers/mtd/maps/Makefile
+@@ -41,3 +41,4 @@ obj-$(CONFIG_MTD_SCB2_FLASH)	+= scb2_fla
+ obj-$(CONFIG_MTD_PLATRAM)	+= plat-ram.o
+ obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
+ obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
++obj-$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o
+EOF
 
-if [ -f "$KCONFIG_KERNEL" ] && ! grep -q "MTD_NAND_MT7620" "$KCONFIG_KERNEL"; then
-    # Sử dụng Tab thực sự (\t) cho Kconfig
-    printf "config MTD_NAND_MT7620\n\ttristate \"Support for NAND on Mediatek MT7620\"\n\tdepends on RALINK && SOC_MT7620\n\n" > kconfig_part.tmp
-    awk '/endmenu/ { system("cat kconfig_part.tmp"); print $0; next } { print }' "$KCONFIG_KERNEL" > "$KCONFIG_KERNEL.tmp" && mv "$KCONFIG_KERNEL.tmp" "$KCONFIG_KERNEL"
-    rm kconfig_part.tmp
-fi
-
-if [ -f "$MAKEFILE_KERNEL" ] && ! grep -q "ralink_nand.o" "$MAKEFILE_KERNEL"; then
-    sed -i '$a\' "$MAKEFILE_KERNEL"
-    echo "obj-\$(CONFIG_MTD_NAND_MT7620)	+= ralink_nand.o" >> "$MAKEFILE_KERNEL"
-fi
