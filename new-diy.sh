@@ -2663,7 +2663,7 @@ awk '/\*\)/ && !done {
 } { print }' target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh > temp.sh && mv temp.sh target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
 
 # 8. Kernel Config (Sửa lỗi "Enable UBI" bằng cách khai báo đầy đủ phụ thuộc)
-CONF_FILE="target/linux/ramips/mt7620/config-6.12"
+CONF_FILE="target/linux/ramips/mt7620/config-6.18"
 if [ -f "$CONF_FILE" ]; then
     sed -i '$a\' "$CONF_FILE" # Đảm bảo có dòng trống cuối file
     cat << 'EOF' >> "$CONF_FILE"
@@ -2683,7 +2683,7 @@ fi
 
 # # 9. Tạo file Patch cho Kernel (Cách an toàn nhất để Kernel nhận Driver)
 # mkdir -p target/linux/ramips/patches-6.12/
-# cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
+# cat << 'EOF' > target/linux/ramips/patches-6.18/0038-mtd-ralink-add-mt7620-nand-driver.patch
 # --- a/drivers/mtd/maps/Kconfig
 # +++ b/drivers/mtd/maps/Kconfig
 # @@ -378,4 +378,8 @@ config MTD_PISMO
@@ -2705,7 +2705,7 @@ fi
 # EOF
 
 # 9. Tạo patch chỉ dựa vào từ khóa "endmenu", không quan tâm số dòng phía trên
-cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-nand.patch
+cat << 'EOF' > target/linux/ramips/patches-6.18/0038-mtd-nand.patch
 --- a/drivers/mtd/maps/Kconfig
 +++ b/drivers/mtd/maps/Kconfig
 @@ -1,1 +1,5 @@
