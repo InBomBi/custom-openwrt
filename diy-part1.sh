@@ -2674,7 +2674,7 @@ awk '/\*\)/ && !done {
     print "\t\t;;"
     done=1
 } { print }' target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh > temp.sh && mv temp.sh target/linux/ramips/mt7620/base-files/lib/upgrade/platform.sh
-# thay doi target/linux/ramips/mt7620/config-6.12
+# thay doi target/linux/ramips/mt7620/config-6.18
 sed -i \
 -e '/CONFIG_CPU_SUPPORTS_MSA=y/a CONFIG_CRC16=y\nCONFIG_CRYPTO_DEFLATE=y\nCONFIG_CRYPTO_HASH_INFO=y' \
 -e '/CONFIG_CRYPTO_LIB_UTILS=y/a CONFIG_CRYPTO_LZO=y\nCONFIG_CRYPTO_RNG2=y' \
@@ -2686,10 +2686,10 @@ sed -i \
 -e '/CONFIG_SOC_BUS=y/a CONFIG_SGL_ALLOC=y' \
 -e '/CONFIG_TINY_SRCU=y/a CONFIG_UBIFS_FS=y\nCONFIG_UBIFS_FS_ADVANCED_COMPR=y\n# CONFIG_UBIFS_FS_ZSTD is not set' \
 -e '/CONFIG_ZBOOT_LOAD_ADDRESS=0x0/a CONFIG_ZLIB_DEFLATE=y\nCONFIG_ZLIB_INFLATE=y' \
-target/linux/ramips/mt7620/config-6.12
+target/linux/ramips/mt7620/config-6.18
 
 # 8. Tạo File Patch Mới (0038-mtd-ralink-add-mt7620-nand-driver.patch)
-cat << 'EOF' > target/linux/ramips/patches-6.12/0038-mtd-ralink-add-mt7620-nand-driver.patch
+cat << 'EOF' > target/linux/ramips/patches-6.18/0038-mtd-ralink-add-mt7620-nand-driver.patch
 --- a/drivers/mtd/maps/Kconfig
 +++ b/drivers/mtd/maps/Kconfig
 @@ -378,4 +378,8 @@ config MTD_PISMO
